@@ -1,7 +1,10 @@
 Diese Tastatur war ein Versuch von mir eine kostengünstige split ortholinerar Tastatur selber zu bauen.
 Beide Seiten werden durch einen Controller gesteuert und sind mit 9 einzelnen Kabeln verbunden (In Zukunft möchte ich diese aber Kabelos machen).
 Die Schalter sind per Hand verkabelt/gelötet und das Gehäuse 3d gedruckt.
-Diese heißt (sehr unkreativ) Rapsackey und basiert auf dem Sweep.
+Eine kleine Spielerei ist, das mit Shift + Backspace --> Delete entsteht.
+
+
+# Diese Tastatur heißt (sehr unkreativ) Rapsackey und basiert auf dem Sweep.
 ![Layer 1](KeyboardLayer1.png)
 ![Layer 2](KeyboardLayer2.png)
 ![Layer 3](KeyboardLayer3.png)
