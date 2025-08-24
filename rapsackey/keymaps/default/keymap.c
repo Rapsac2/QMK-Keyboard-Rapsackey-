@@ -3,11 +3,26 @@
 
 #include QMK_KEYBOARD_H
 
-//#include "keymap_german.h"
+#include "print.h"
 
 #define _DEFAULT_LAYER1 0
 #define _NUMBER_LAYER2 1
 #define _NAVIGATION_LAYER3 2
+
+#define MODTAP_HOLD_THRESHOLD 200  // ms, ab wann Hold als Hold gilt
+#define Backspace_HOLD_THRESHOLD 200
+#define TOGGLE_TAPHOLD_HOLD_THRESHOLD 2000
+
+
+
+
+enum custom_keycodes {
+    BSPC_CTRL = SAFE_RANGE,
+    ALT_LAYER3TAP,
+    CTRL_LAYER2TAP,
+    SHIFT_LAYER1TAP,
+    TOGGLE_TAPHOLD
+};
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
@@ -42,8 +57,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_DEFAULT_LAYER1] = LAYOUT( /* Qwertz */
                 KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,           KC_Z,    KC_U,    KC_I,      KC_O,     KC_P,
     KC_TAB,     KC_A,    KC_S,    KC_D,    KC_F,    KC_G,           KC_H,    KC_J,    KC_K,      KC_L,     KC_SCLN,    KC_ENTER,
-    KC_ESCAPE,  KC_Y,    KC_X,    KC_C,    KC_V,    KC_B,           KC_N,    KC_M,    KC_LBRC,   KC_QUOT,  KC_MINS,  TO(_NAVIGATION_LAYER3),
-                                   KC_BACKSPACE, KC_SPACE,          KC_LEFT_SHIFT, TO(_NUMBER_LAYER2)
+    KC_ESCAPE,  KC_Y,    KC_X,    KC_C,    KC_V,    KC_B,           KC_N,    KC_M,    KC_LBRC,   KC_QUOT,  KC_MINS,    ALT_LAYER3TAP,
+                                  KC_SPACE,    BSPC_CTRL,           CTRL_LAYER2TAP, KC_LEFT_SHIFT
     ),
     /*     ! " ' [ ]   - 7 8 9 /
      * TAB ? : . ( )   0 4 5 6 * ENTER
@@ -53,19 +68,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_NUMBER_LAYER2] = LAYOUT( 
                 LSFT(KC_1),       LSFT(KC_2),        LSFT(KC_NUHS),    RALT(KC_8),    RALT(KC_9),           KC_SLSH,    KC_7,    KC_8,    KC_9,    LSFT(KC_7),
     KC_TAB,     LSFT(KC_MINS),    LSFT(KC_DOT),      KC_DOT,           LSFT(KC_8),    LSFT(KC_9),           KC_0,       KC_4,    KC_5,    KC_6,    LSFT(KC_RBRC),  KC_ENTER,
-    KC_ESCAPE,  KC_GRV,           LSFT(KC_COMM),     KC_COMM,          RALT(KC_7),    RALT(KC_0),           KC_RBRC,    KC_1,    KC_2,    KC_3,    LSFT(KC_0),     TO(_NAVIGATION_LAYER3),
-                                                                       KC_BACKSPACE,  KC_SPACE,             TO(_DEFAULT_LAYER1), KC_LEFT_GUI
+    KC_ESCAPE,  KC_GRV,           LSFT(KC_COMM),     KC_COMM,          RALT(KC_7),    RALT(KC_0),           KC_RBRC,    KC_1,    KC_2,    KC_3,    LSFT(KC_0),     ALT_LAYER3TAP,
+                                                                       KC_SPACE,       BSPC_CTRL,           KC_LGUI, SHIFT_LAYER1TAP 
     ),
-    /*         StrgF  Up  copy  paste    _ \ % € nxtTrack
+    /*         StrgF  Up  copy  paste    _ \ % € nxtTrack                                                   
      * TAB Strg left Down Right StrgA    < > & # play/pause  ENTER
      * ECS Shift   snipping undo redo    | @ ° ~ mute        ALT
      *                       BSPC SPC   L1 L2
      */
     [_NAVIGATION_LAYER3] = LAYOUT( 
-                KC_NO,            LCTL(KC_F),    KC_UP,         LCTL(KC_C),     LCTL(KC_V),               LSFT(KC_SLSH),    RALT(KC_MINS),    LSFT(KC_5),     RALT(KC_E),     KC_MEDIA_NEXT_TRACK,
+                KC_DEL,           LCTL(KC_F),    KC_UP,         LCTL(KC_C),     LCTL(KC_V),               LSFT(KC_SLSH),    RALT(KC_MINS),    LSFT(KC_5),     RALT(KC_E),     TOGGLE_TAPHOLD,
     KC_TAB,     KC_LEFT_CTRL,     KC_LEFT,       KC_DOWN,       KC_RIGHT,       LCTL(KC_A),               KC_NUBS,          LSFT(KC_NUBS),    LSFT(KC_6),     KC_NUHS,        KC_MEDIA_PLAY_PAUSE,   KC_ENTER,
     KC_ESCAPE,  KC_LEFT_SHIFT,    KC_NO,         LSG(KC_S),     LCTL(KC_Z),     LCTL(KC_Y),               RALT(KC_NUBS),    RALT(KC_Q),       LSFT(KC_GRV),   RALT(KC_RBRC),  KC_PAUSE,              KC_LEFT_ALT,
-                                                                KC_BACKSPACE,   KC_SPACE,                 TO(_DEFAULT_LAYER1), TO(_NUMBER_LAYER2)
+                                                                KC_SPACE,        BSPC_CTRL,               CTRL_LAYER2TAP,   SHIFT_LAYER1TAP
     )
 };
 
@@ -74,42 +89,162 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Initialize variable holding the binary
 // representation of active modifiers.
 uint8_t mod_state;
+
+static bool bspc_held = false;
+static bool del_held = false;
+static uint16_t bspc_timer = 0;
+static uint16_t del_timer = 0;
+static bool ctrl_sent = false;
+
+static bool isctrllayer2key_pressed = false;
+static uint16_t ctrllayer2key_timer = 0;
+static uint8_t ctrllayer2key_previous_layer = 0;
+
+static bool isaltlayer3key_pressed = false;
+static uint16_t altlayer3key_timer = 0;
+static uint8_t altlayer3key_previous_layer = 0;
+
+static bool isshiftlayer1key_pressed = false;
+static uint16_t shiftlayer1key_timer = 0;
+static uint8_t shiftlayer1key_previous_layer = 0;
+
+static bool isTOGGLE_TAPHOLD_pressed = false;
+static uint16_t TOGGLE_TAPHOLD_timer = 0;
+static bool TOGGLE_TAPHOLD_state = true; //standardmäßig ist tap hold aktiv
+
+
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     // Store the current modifier state in the variable for later reference
     mod_state = get_mods();
+    dprintf("------------------------\n");
+    dprintf("Layer: %u\n", get_highest_layer(layer_state));
+    dprintf("Mod state: 0b%08b\n", mod_state);
+    dprintf("TAP_HOLD state: %u\n", TOGGLE_TAPHOLD_state);
     switch (keycode) {
-
-    case KC_BSPC:
-        {
-        // Initialize a boolean variable that keeps track
-        // of the delete key status: registered or not?
-        static bool delkey_registered;
-        if (record->event.pressed) {
-            // Detect the activation of either shift keys
-            if (mod_state & MOD_MASK_SHIFT) {
-                // First temporarily canceling both shifts so that
-                // shift isn't applied to the KC_DEL keycode
-                del_mods(MOD_MASK_SHIFT);
-                register_code(KC_DEL);
-                // Update the boolean variable to reflect the status of KC_DEL
-                delkey_registered = true;
-                // Reapplying modifier state so that the held shift key(s)
-                // still work even after having tapped the Backspace/Delete key.
-                set_mods(mod_state);
-                return false;
+    case BSPC_CTRL: // on tap Backspace senden, wenn gehalten Strg+Backspace und wenn Shift gehalten ist, dann Delete senden und delete + Strg
+    if (record->event.pressed) {
+                ctrl_sent = false;
+                if(mod_state & MOD_MASK_SHIFT){ //shift variante testen
+                    // First temporarily canceling both shifts so that
+                    // shift isn't applied to the KC_DEL keycode
+                    del_mods(MOD_MASK_SHIFT);
+                    tap_code(KC_DEL);
+                    // Reapplying modifier state so that the held shift key(s)
+                    // still work even after having tapped the Backspace/Delete key.
+                    set_mods(mod_state);
+                    del_timer = timer_read();
+                    del_held = true;
+                    return false;
+                } else {
+                    // Sofort Backspace senden
+                    tap_code(KC_BSPC);
+                    bspc_held = true;
+                    bspc_timer = timer_read();
+                }
+            } else {
+                bspc_held = false;
+                del_held = false;
             }
-        } else { // on release of KC_BSPC
-            // In case KC_DEL is still being sent even after the release of KC_BSPC
-            if (delkey_registered) {
-                unregister_code(KC_DEL);
-                delkey_registered = false;
-                return false;
+            return false; // Kein Standardverhalten (keine Ahnung ob weitere hotkey dann noch gehen)
+
+
+    case CTRL_LAYER2TAP: // on tap layer wechseln und wenn gehalten strg senden
+        if(record->event.pressed) {
+            
+            ctrllayer2key_timer = timer_read();
+            isctrllayer2key_pressed = true;
+            ctrllayer2key_previous_layer = get_highest_layer(layer_state);
+            layer_move(_NUMBER_LAYER2);
+            
+            
+        } else {
+            isctrllayer2key_pressed = false;
+            unregister_code(KC_LCTL);
+        }
+        return false;
+    
+        case ALT_LAYER3TAP:
+        if(record->event.pressed) {
+            
+            altlayer3key_timer = timer_read();
+            isaltlayer3key_pressed = true;
+            altlayer3key_previous_layer = get_highest_layer(layer_state);
+            layer_move(_NAVIGATION_LAYER3);
+            
+            
+        } else {
+            isaltlayer3key_pressed = false;
+            unregister_code(KC_LALT);
+        }
+        return false;
+
+        case SHIFT_LAYER1TAP:
+        if(record->event.pressed) {
+            
+            shiftlayer1key_timer = timer_read();
+            isshiftlayer1key_pressed = true;
+            shiftlayer1key_previous_layer = get_highest_layer(layer_state);
+            layer_move(_DEFAULT_LAYER1);
+            
+            
+        } else {
+            isshiftlayer1key_pressed = false;
+            unregister_code(KC_LSFT);
+        }
+        return false;
+    
+    
+    case TOGGLE_TAPHOLD: // toggelt das tap hold-verhalten der sondertasten
+        if(record->event.pressed) {
+            TOGGLE_TAPHOLD_timer = timer_read();
+            isTOGGLE_TAPHOLD_pressed = true;
+        } else {
+            isTOGGLE_TAPHOLD_pressed = false;
+            if (timer_elapsed(TOGGLE_TAPHOLD_timer) < TOGGLE_TAPHOLD_HOLD_THRESHOLD) {
+                tap_code(KC_MEDIA_NEXT_TRACK); // Beispiel: Bei kurzem Drücken skip track gesenden
+            } else { //beim langen Drücken den Zustand toggeln
+                TOGGLE_TAPHOLD_state = !TOGGLE_TAPHOLD_state; 
             }
         }
-        // Let QMK process the KC_BSPC keycode as usual outside of shift
-        return true;
-    }
+        return false; // verhindert die weitergabe des keycodes an qmk
+    
+
 
     }
     return true;
 };
+
+
+void matrix_scan_user(void) {
+    if (TOGGLE_TAPHOLD_state && bspc_held && !ctrl_sent && timer_elapsed(bspc_timer) > Backspace_HOLD_THRESHOLD) { 
+        // Wenn Taste noch gehalten wird und Zeit abgelaufen ist
+        tap_code16(LCTL(KC_BSPC));
+        ctrl_sent = true;
+    }
+    if (TOGGLE_TAPHOLD_state && del_held && !ctrl_sent && timer_elapsed(del_timer) > Backspace_HOLD_THRESHOLD){
+        tap_code16(LCTL(KC_DEL));
+        ctrl_sent = true;
+    }
+    
+    //layer wechseln wenn die Zeit abgelaufen ist
+    if(TOGGLE_TAPHOLD_state && isctrllayer2key_pressed && timer_elapsed(ctrllayer2key_timer) > MODTAP_HOLD_THRESHOLD){
+        layer_move(ctrllayer2key_previous_layer);
+        register_code(KC_LCTL); 
+    }
+    if(TOGGLE_TAPHOLD_state && isaltlayer3key_pressed && timer_elapsed(altlayer3key_timer) > MODTAP_HOLD_THRESHOLD){
+        layer_move(altlayer3key_previous_layer);
+        register_code(KC_LCTL); 
+    }
+    if(TOGGLE_TAPHOLD_state && isshiftlayer1key_pressed && timer_elapsed(shiftlayer1key_timer) > MODTAP_HOLD_THRESHOLD){
+        layer_move(shiftlayer1key_previous_layer);
+        register_code(KC_LSFT); 
+    }
+}
+void keyboard_post_init_user(void) {
+  // Customise these values to desired behaviour
+  debug_enable=true;
+  //debug_matrix=true;
+  //debug_keyboard=true;
+  //debug_mouse=true;
+}
