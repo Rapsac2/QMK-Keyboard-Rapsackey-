@@ -7,7 +7,7 @@ Eigenschaften:
 - Shift + Backspace -> Delete (Löscht nach Rechts)
 - Backspace (hold) -> CTRL + Backspace (Löscht ganze Wörter auf der linken Seite)
 - Shift + Backspace (hold) -> Delete + Shift (Löscht nach Rechts die ganze Zeile)
-- 3. Layer next Track Key:
+- Layer 3 next Track Key:
     * Tap -> next Track
     * Hold (2 sec) -> Toggle Tap Hold behavior on/off
 - Layer 1:
