@@ -24,9 +24,7 @@ Ein gutes Youtube Video zum Einstieg in die Welt der Tastaturen: https://www.you
 Zum Layout erstellen: https://ergogen.cache.works/
 
 
-![Layer 1](KeyboardLayer1.png)
-![Layer 2](KeyboardLayer2.png)
-![Layer 3](KeyboardLayer3.png)
+
 ![Controller: Pro Micro RP2040](controllerLayout.PNG)
 
 
