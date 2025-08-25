@@ -24,6 +24,7 @@ Ein gutes Youtube Video zum Einstieg in die Welt der Tastaturen: https://www.you
 
 Zum Layout erstellen: https://ergogen.cache.works/
 
+Edit: Esc und TAB sind vertaucht
 
 ![Layer 1:](KeyboardLayer1.png)
 ![Layer 2:](KeyboardLayer2.png)
