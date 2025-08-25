@@ -55,9 +55,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      // statt Ü,Ä usw werden die englischen zeichen verwendet, da der Commputer diese dann umwandelt
      // https://mechanische-tastaturen.net/qmk-und-via-guide/qmk-via-keycodes-fuer-deutsche-zeichen/
     [_DEFAULT_LAYER1] = LAYOUT( /* Qwertz */
-                KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,           KC_Z,    KC_U,    KC_I,      KC_O,     KC_P,
-    KC_TAB,     KC_A,    KC_S,    KC_D,    KC_F,    KC_G,           KC_H,    KC_J,    KC_K,      KC_L,     KC_SCLN,    KC_ENTER,
-    KC_ESCAPE,  KC_Y,    KC_X,    KC_C,    KC_V,    KC_B,           KC_N,    KC_M,    KC_LBRC,   KC_QUOT,  KC_MINS,    ALT_LAYER3TAP,
+                KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,           KC_Y,    KC_U,    KC_I,      KC_O,     KC_P,
+    KC_ESCAPE,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,           KC_H,    KC_J,    KC_K,      KC_L,     KC_SCLN,    KC_ENTER,
+    KC_TAB,     KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,           KC_N,    KC_M,    KC_LBRC,   KC_QUOT,  KC_MINS,    ALT_LAYER3TAP,
                                   KC_SPACE,    BSPC_CTRL,           CTRL_LAYER2TAP, KC_LEFT_SHIFT
     ),
     /*     ! " ' [ ]   - 7 8 9 /
@@ -67,19 +67,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      */
     [_NUMBER_LAYER2] = LAYOUT( 
                 LSFT(KC_1),       LSFT(KC_2),        LSFT(KC_NUHS),    RALT(KC_8),    RALT(KC_9),           KC_SLSH,    KC_7,    KC_8,    KC_9,    LSFT(KC_7),
-    KC_TAB,     LSFT(KC_MINS),    LSFT(KC_DOT),      KC_DOT,           LSFT(KC_8),    LSFT(KC_9),           KC_0,       KC_4,    KC_5,    KC_6,    LSFT(KC_RBRC),  KC_ENTER,
-    KC_ESCAPE,  KC_GRV,           LSFT(KC_COMM),     KC_COMM,          RALT(KC_7),    RALT(KC_0),           KC_RBRC,    KC_1,    KC_2,    KC_3,    LSFT(KC_0),     ALT_LAYER3TAP,
+    KC_ESCAPE,  LSFT(KC_MINS),    LSFT(KC_DOT),      KC_DOT,           LSFT(KC_8),    LSFT(KC_9),           KC_0,       KC_4,    KC_5,    KC_6,    LSFT(KC_RBRC),  KC_ENTER,
+    KC_TAB,     KC_GRV,           LSFT(KC_COMM),     KC_COMM,          RALT(KC_7),    RALT(KC_0),           KC_RBRC,    KC_1,    KC_2,    KC_3,    LSFT(KC_0),     ALT_LAYER3TAP,
                                                                        KC_SPACE,       BSPC_CTRL,           KC_LGUI, SHIFT_LAYER1TAP 
     ),
-    /*         StrgF  Up  copy  paste    _ \ % € nxtTrack                                                   
+    /*      del StrgF  Up  copy paste    _ \ % € nxtTrack                                                   
      * TAB Strg left Down Right StrgA    < > & # play/pause  ENTER
      * ECS Shift   snipping undo redo    | @ ° ~ mute        ALT
      *                       BSPC SPC   L1 L2
      */
     [_NAVIGATION_LAYER3] = LAYOUT( 
                 KC_DEL,           LCTL(KC_F),    KC_UP,         LCTL(KC_C),     LCTL(KC_V),               LSFT(KC_SLSH),    RALT(KC_MINS),    LSFT(KC_5),     RALT(KC_E),     TOGGLE_TAPHOLD,
-    KC_TAB,     KC_LEFT_CTRL,     KC_LEFT,       KC_DOWN,       KC_RIGHT,       LCTL(KC_A),               KC_NUBS,          LSFT(KC_NUBS),    LSFT(KC_6),     KC_NUHS,        KC_MEDIA_PLAY_PAUSE,   KC_ENTER,
-    KC_ESCAPE,  KC_LEFT_SHIFT,    KC_NO,         LSG(KC_S),     LCTL(KC_Z),     LCTL(KC_Y),               RALT(KC_NUBS),    RALT(KC_Q),       LSFT(KC_GRV),   RALT(KC_RBRC),  KC_PAUSE,              KC_LEFT_ALT,
+    KC_ESCAPE,  KC_LEFT_CTRL,     KC_LEFT,       KC_DOWN,       KC_RIGHT,       LCTL(KC_A),               KC_NUBS,          LSFT(KC_NUBS),    LSFT(KC_6),     KC_NUHS,        KC_MEDIA_PLAY_PAUSE,   KC_ENTER,
+    KC_TAB,     KC_LEFT_SHIFT,    KC_NO,         LSG(KC_S),     LCTL(KC_Z),     LCTL(KC_Y),               RALT(KC_NUBS),    RALT(KC_Q),       LSFT(KC_GRV),   RALT(KC_RBRC),  KC_PAUSE,              KC_LEFT_ALT,
                                                                 KC_SPACE,        BSPC_CTRL,               CTRL_LAYER2TAP,   SHIFT_LAYER1TAP
     )
 };
